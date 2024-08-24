@@ -75,8 +75,8 @@ async function sendTransaction(wallet) {
     const baseFee = block.baseFeePerGas;  // 블록 기본 수수료
 
     // 적절한 maxPriorityFeePerGas와 maxFeePerGas 설정
-    const maxPriorityFeePerGas = ethers.utils.parseUnits("1.0", "gwei");  // 1 Gwei로 설정
-    const maxFeePerGas = baseFee.add(maxPriorityFeePerGas);  // 기본 수수료 + 우선 수수료
+    const maxPriorityFeePerGas = ethers.utils.parseUnits("1.0", "gwei");  // 우선 수수료 1 Gwei
+    const maxFeePerGas = baseFee.add(ethers.utils.parseUnits("0.5", "gwei"));  // 기본 수수료 + 0.5 Gwei 우선 수수료
 
     console.log(`현재 블록 기본 수수료: ${ethers.utils.formatUnits(baseFee, 'gwei')} Gwei`);
     console.log(`설정된 maxPriorityFeePerGas: ${ethers.utils.formatUnits(maxPriorityFeePerGas, 'gwei')} Gwei`);
