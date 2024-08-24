@@ -12,20 +12,25 @@ export YELLOW='\033[1;33m'
 export GREEN='\033[0;32m'
 export NC='\033[0m'  # No Color
 
-# 사용자로부터 프라이빗 키 입력받기
-read -p "메타마스크 프라이빗 키를 입력하세요 (앞에 0x 제외하고 입력): " user_private_key
+# 사용자로부터 여러 프라이빗 키 입력받기
+read -p "메타마스크 프라이빗 키를 콤마로 구분하여 입력하세요 (예: key1,key2,...): " user_private_keys
 
 # 프라이빗 키 입력 검증
-if [ -z "$user_private_key" ]; then
+if [ -z "$user_private_keys" ]; then
   echo_blue_bold "${RED}오류: 프라이빗 키를 입력하지 않았습니다.${NC}"
   exit 1
 fi
 
-# 프라이빗 키가 64자리인지 확인
-if [ ${#user_private_key} -ne 64 ]; then
-  echo_blue_bold "${RED}오류: 프라이빗 키는 64자리 16진수 문자열이어야 합니다.${NC}"
-  exit 1
-fi
+# 프라이빗 키를 배열로 변환
+IFS=',' read -r -a private_keys_array <<< "$user_private_keys"
+
+# 프라이빗 키가 유효한지 확인
+for key in "${private_keys_array[@]}"; do
+  if [ ${#key} -ne 64 ]; then
+    echo_blue_bold "${RED}오류: 프라이빗 키는 64자리 16진수 문자열이어야 합니다.${NC}"
+    exit 1
+  fi
+done
 
 # 기존 privatekeys.txt 파일이 있으면 삭제
 if [ -f privatekeys.txt ]; then
@@ -34,7 +39,9 @@ if [ -f privatekeys.txt ]; then
 fi
 
 # 새로운 privatekeys.txt 파일 생성 및 프라이빗 키 추가
-echo "$user_private_key" > privatekeys.txt
+for key in "${private_keys_array[@]}"; do
+  echo "$key" >> privatekeys.txt
+done
 echo_blue_bold "새로운 privatekeys.txt 파일이 생성되고 프라이빗 키가 추가되었습니다."
 echo
 
