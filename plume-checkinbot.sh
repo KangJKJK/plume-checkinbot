@@ -21,6 +21,12 @@ if [ -z "$user_private_key" ]; then
   exit 1
 fi
 
+# 프라이빗 키가 64자리인지 확인
+if [ ${#user_private_key} -ne 64 ]; then
+  echo_blue_bold "${RED}오류: 프라이빗 키는 64자리 16진수 문자열이어야 합니다.${NC}"
+  exit 1
+fi
+
 # 기존 privatekeys.txt 파일이 있으면 삭제
 if [ -f privatekeys.txt ]; then
   rm privatekeys.txt
@@ -75,7 +81,6 @@ async function sendTransaction(wallet) {
     try {
         // 트랜잭션 전송 및 결과 대기
         const transactionResponse = await wallet.sendTransaction(tx);
-        const walletAddress = wallet.address;
         console.log("\033[1;35m트랜잭션 해시:\033[0m", transactionResponse.hash);
         const receipt = await transactionResponse.wait();  // 트랜잭션 확인 대기
         console.log("");
@@ -94,10 +99,14 @@ async function main() {
             continue;
         }
 
-        const wallet = new ethers.Wallet(key, provider);
-        for (let i = 0; i < numberOfTransactions; i++) {
-            console.log("지갑에서 체크인 중:", wallet.address);
-            await sendTransaction(wallet);  // 트랜잭션 전송
+        try {
+            const wallet = new ethers.Wallet(key, provider);
+            for (let i = 0; i < numberOfTransactions; i++) {
+                console.log("지갑에서 체크인 중:", wallet.address);
+                await sendTransaction(wallet);  // 트랜잭션 전송
+            }
+        } catch (error) {
+            console.error("유효하지 않은 프라이빗 키:", key, error);
         }
     }
 }
@@ -116,4 +125,3 @@ echo
 # 안내 메시지 출력
 echo -e "${GREEN}모든 작업이 완료되었습니다.${NC}"
 echo -e "${GREEN}스크립트작성자-https://t.me/kjkresearch${NC}"
-
