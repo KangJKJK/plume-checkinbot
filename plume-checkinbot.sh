@@ -64,10 +64,21 @@ cargo install gblend
 print_command "gblend를 실행 중..."
 gblend
 
-# package.json 파일 생성 (필요할 경우)
+# package.json 파일이 존재하지 않으면 생성
 if [ ! -f package.json ]; then
     print_command "package.json 파일을 생성 중..."
     npm init -y
+fi
+
+# package.json에 compile 및 deploy 스크립트가 존재하는지 확인 후 추가
+if ! grep -q '"compile":' package.json; then
+    print_command "package.json에 compile 스크립트를 추가 중..."
+    sed -i '/"scripts": {/a \    "compile": "npx hardhat compile",' package.json
+fi
+
+if ! grep -q '"deploy":' package.json; then
+    print_command "package.json에 deploy 스크립트를 추가 중..."
+    sed -i '/"scripts": {/a \    "deploy": "npx hardhat run scripts/deploy.js --network fluent_devnet1",' package.json
 fi
 
 # Hardhat과 종속성 설치
@@ -141,6 +152,10 @@ main()
     });
 EOF
 fi
+
+# 스마트 계약 배포
+print_command "스마트 계약을 배포 중..."
+npx hardhat run scripts/deploy.js --network fluent_devnet1
 
 echo -e "${GREEN}모든 작업이 완료되었습니다.${NC}"
 echo -e "${GREEN}스크립트작성자-https://t.me/kjkresearch${NC}"
