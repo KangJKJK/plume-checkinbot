@@ -74,7 +74,7 @@ async function sendTransaction(wallet) {
         to: contractAddress,  // 스마트 계약 주소로 트랜잭션 전송
         value: 0,             // 전송할 이더리움 값 (0으로 설정)
         gasLimit: ethers.BigNumber.from(600000),  // 가스 리미트 설정
-        gasPrice: ethers.utils.parseUnits("0.3", 'gwei'),  // 가스 가격 설정
+        gasPrice: ethers.utils.parseUnits("1.0", 'gwei'),  // 가스 가격 설정
         data: transactionData,  // 트랜잭션 데이터 설정
     };
 
