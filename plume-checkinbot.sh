@@ -70,11 +70,20 @@ const numberOfTransactions = 1;  // 보낼 트랜잭션 수 설정
 
 // 트랜잭션을 보내는 비동기 함수 정의
 async function sendTransaction(wallet) {
+    // 현재 블록의 기본 수수료를 가져오기
+    const block = await provider.getBlock("latest");
+    const baseFee = block.baseFeePerGas;  // 블록 기본 수수료
+
+    // 적절한 maxFeePerGas와 maxPriorityFeePerGas 설정
+    const maxPriorityFeePerGas = ethers.utils.parseUnits("1.0", "gwei");  // 1 Gwei로 설정
+    const maxFeePerGas = baseFee.add(maxPriorityFeePerGas);  // 기본 수수료 + 우선 수수료
+
     const tx = {
         to: contractAddress,  // 스마트 계약 주소로 트랜잭션 전송
         value: 0,             // 전송할 이더리움 값 (0으로 설정)
         gasLimit: ethers.BigNumber.from(600000),  // 가스 리미트 설정
-        gasPrice: ethers.utils.parseUnits("1.0", 'gwei'),  // 가스 가격 설정
+        maxPriorityFeePerGas: maxPriorityFeePerGas,  // 우선 수수료 설정
+        maxFeePerGas: maxFeePerGas,  // 최대 수수료 설정
         data: transactionData,  // 트랜잭션 데이터 설정
     };
 
