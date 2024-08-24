@@ -13,10 +13,19 @@ print_command() {
 # 홈 디렉토리로 이동
 cd $HOME
 
+# 프로젝트 디렉토리 설정
+PROJECT_DIR="$HOME/my_hardhat_project"
+mkdir -p $PROJECT_DIR
+cd $PROJECT_DIR
+
 # Cargo 설치
-print_command "Cargo를 설치 중..."
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-. "$HOME/.cargo/env"
+if command -v cargo &> /dev/null; then
+    print_command "Cargo가 이미 설치되어 있습니다. 설치 단계를 건너뜁니다."
+else
+    print_command "Cargo를 설치 중..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    . "$HOME/.cargo/env"
+fi
 
 # NVM과 Node 설치
 print_command "NVM과 Node를 설치 중..."
@@ -55,17 +64,22 @@ cargo install gblend
 print_command "gblend를 실행 중..."
 gblend
 
-# 프로젝트 종속성 설치
-print_command "종속성을 설치 중..."
-npm install
+# package.json 파일 생성 (필요할 경우)
+if [ ! -f package.json ]; then
+    print_command "package.json 파일을 생성 중..."
+    npm init -y
+fi
 
-# dotenv 패키지 설치
-print_command "dotenv 패키지를 설치 중..."
+# Hardhat과 종속성 설치
+print_command "종속성을 설치 중..."
+npm install --save-dev hardhat @nomiclabs/hardhat-ethers @nomiclabs/hardhat-vyper dotenv
+
+# dotenv 패키지 설치 (이미 설치된 경우를 고려하여 추가)
 npm install dotenv
 
 # 기존 hardhat.config.js 파일 삭제
 print_command "hardhat.config.js 파일을 삭제 중..."
-rm hardhat.config.js
+rm -f hardhat.config.js
 
 # 새로운 hardhat.config.js 파일 생성
 print_command "hardhat.config.js 파일을 업데이트 중..."
@@ -103,11 +117,30 @@ EOF
 
 # 스마트 계약 컴파일
 print_command "스마트 계약을 컴파일 중..."
-npm run compile
+npx hardhat compile
 
-# 스마트 계약 배포
-print_command "스마트 계약을 배포 중..."
-npm run deploy
+# deploy 스크립트가 존재하는지 확인하고 생성
+if [ ! -f scripts/deploy.js ]; then
+    mkdir -p scripts
+    print_command "deploy.js 파일을 생성 중..."
+    cat <<EOF > scripts/deploy.js
+const { ethers } = require("hardhat");
+
+async function main() {
+    const Contract = await ethers.getContractFactory("YourContractName");
+    const contract = await Contract.deploy();
+    await contract.deployed();
+    console.log("Contract deployed to:", contract.address);
+}
+
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
+EOF
+fi
 
 echo -e "${GREEN}모든 작업이 완료되었습니다.${NC}"
 echo -e "${GREEN}스크립트작성자-https://t.me/kjkresearch${NC}"
