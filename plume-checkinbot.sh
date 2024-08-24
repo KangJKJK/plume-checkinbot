@@ -15,6 +15,12 @@ export NC='\033[0m'  # No Color
 # 사용자로부터 프라이빗 키 입력받기
 read -p "메타마스크 프라이빗 키를 입력하세요 (앞에 0x 제외하고 입력): " user_private_key
 
+# 프라이빗 키 입력 검증
+if [ -z "$user_private_key" ]; then
+  echo_blue_bold "${RED}오류: 프라이빗 키를 입력하지 않았습니다.${NC}"
+  exit 1
+fi
+
 # 기존 privatekeys.txt 파일이 있으면 삭제
 if [ -f privatekeys.txt ]; then
   rm privatekeys.txt
@@ -45,7 +51,7 @@ const fs = require("fs");
 const ethers = require("ethers");
 
 // privatekeys.txt 파일에서 개인 키를 읽어와 줄바꿈을 기준으로 배열로 저장
-const privateKeys = fs.readFileSync("privatekeys.txt", "utf8").trim().split("\\n");
+const privateKeys = fs.readFileSync("privatekeys.txt", "utf8").trim().split("\\n").filter(key => key.trim() !== "");
 
 // 이더리움 공급자 URL 설정
 const providerURL = "https://testnet-rpc.plumenetwork.xyz/http";
@@ -82,6 +88,12 @@ async function sendTransaction(wallet) {
 async function main() {
     // 각 개인 키에 대해 트랜잭션을 전송
     for (const key of privateKeys) {
+        // 프라이빗 키가 올바른 형식인지 확인
+        if (key.length !== 64) {
+            console.error("유효하지 않은 프라이빗 키:", key);
+            continue;
+        }
+
         const wallet = new ethers.Wallet(key, provider);
         for (let i = 0; i < numberOfTransactions; i++) {
             console.log("지갑에서 체크인 중:", wallet.address);
