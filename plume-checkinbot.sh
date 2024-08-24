@@ -12,6 +12,9 @@ export YELLOW='\033[1;33m'
 export GREEN='\033[0;32m'
 export NC='\033[0m'  # No Color
 
+# 사용자로부터 프라이빗 키 입력받기
+read -p "메타마스크 프라이빗 키를 입력하세요 (앞에 0x 제외하고 입력): " user_private_key
+
 # 기존 privatekeys.txt 파일이 있으면 삭제
 if [ -f privatekeys.txt ]; then
   rm privatekeys.txt
@@ -22,9 +25,6 @@ fi
 echo "$user_private_key" > privatekeys.txt
 echo_blue_bold "새로운 privatekeys.txt 파일이 생성되고 프라이빗 키가 추가되었습니다."
 echo
-
-# 사용자로부터 프라이빗 키 입력받기
-read -p "메타마스크 프라이빗 키를 입력하세요 (앞에 0x 제외하고 입력): " user_private_key
 
 # ethers 패키지가 설치되어 있지 않으면 설치, 이미 설치되어 있으면 메시지 출력
 if ! npm list ethers@5.5.4 >/dev/null 2>&1; then
