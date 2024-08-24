@@ -6,6 +6,12 @@ function echo_blue_bold {
 }
 echo
 
+# 컬러 정의
+export RED='\033[0;31m'
+export YELLOW='\033[1;33m'
+export GREEN='\033[0;32m'
+export NC='\033[0m'  # No Color
+
 # 사용자로부터 프라이빗 키 입력받기
 read -p "메타마스크 프라이빗 키를 입력하세요 (앞에 0x 제외하고 입력): " user_private_key
 
