@@ -13,7 +13,7 @@ export GREEN='\033[0;32m'
 export NC='\033[0m'  # No Color
 
 # 사용자로부터 여러 프라이빗 키 입력받기
-read -p "메타마스크 프라이빗 키를 콤마로 구분하여 입력하세요 (예: key1,key2,...): " user_private_keys
+read -p "메타마스크 프라이빗 키를 콤마로 구분하여 입력하세요.버너지갑을 사용하세요. (예: key1,key2,...): " user_private_keys
 
 # 프라이빗 키 입력 검증
 if [ -z "$user_private_keys" ]; then
